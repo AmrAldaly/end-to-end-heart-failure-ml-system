@@ -1,4 +1,4 @@
-#❤️ Heart Failure Survival Prediction — End-to-End ML Project
+# ❤️ Heart Failure Survival Prediction — End-to-End ML Project
 
 This project predicts the survival probability of patients with heart failure using clinical records.
 
@@ -6,7 +6,7 @@ The main objective is not only model accuracy, but to demonstrate a complete end
 
 This project follows a production-grade ML system design, not a notebook-based workflow.
 
-##🚀 Project Highlights
+## 🚀 Project Highlights
 
 Modular ML pipeline using MVC architecture
 
@@ -24,7 +24,7 @@ Docker containerization
 
 Cloud deployment on AWS / Azure
 
-##🧠 Machine Learning Pipeline
+## 🧠 Machine Learning Pipeline
 
 The project is structured into independent components:
 
@@ -36,7 +36,7 @@ Performs train/test split
 
 Stores artifacts
 
-###Data Transformation
+### Data Transformation
 
 Winsorization for outlier handling
 
@@ -48,7 +48,7 @@ StandardScaler (normal features)
 
 Preprocessor saved as artifact
 
-###Model Training
+### Model Training
 
 Multiple classifiers tested
 
@@ -58,17 +58,17 @@ Best model selected based on F1 score
 
 Model saved as artifact
 
-###Prediction Pipeline
+### Prediction Pipeline
 
 Loads saved model & preprocessor
 
 Performs inference on new data
 
-##🌐 Web Application
+## 🌐 Web Application
 
 A Flask web interface allows users to input patient clinical data and receive real-time survival prediction.
 
-##🐳 Run with Docker (Local)
+## 🐳 Run with Docker (Local)
 docker build -t heart-failure-ml .
 docker run -p 8000:8000 heart-failure-ml
 
@@ -77,7 +77,7 @@ Open in browser:
 
 http://localhost:5000
 
-##☁️ Cloud Deployment
+## ☁️ Cloud Deployment
 
 The Dockerized application can be deployed to:
 
@@ -87,7 +87,7 @@ Azure Container Apps
 
 This ensures portability, scalability, and production-ready deployment.
 
-##🛠 Tech Stack
+## 🛠 Tech Stack
 
 Python
 
@@ -101,7 +101,7 @@ Docker
 
 AWS / Azure
 
-##📁 Project Structure
+## 📁 Project Structure
 ├── artifacts/              # Saved model & preprocessor
 ├── src/
 │   ├── components/         # Data ingestion, transformation, training
@@ -114,7 +114,7 @@ AWS / Azure
 ├── Dockerfile
 └── requirements.txt
 
-##📊 Dataset
+## 📊 Dataset
 
 Heart Failure Clinical Records Dataset containing medical attributes such as:
 
@@ -136,7 +136,7 @@ And more…
 
 Target variable: DEATH_EVENT
 
-##🎯 Goal of This Project
+## 🎯 Goal of This Project
 
 To demonstrate practical skills in:
 
@@ -152,7 +152,7 @@ Cloud deployment
 
 Building ML systems beyond notebooks
 
-##📸 Screenshots
+## 📸 Screenshots
 
 ### Home Page
 ![Home Page](assets/home.png)
@@ -164,6 +164,6 @@ Building ML systems beyond notebooks
 ![Result](assets/result.png)
 
 
-##👨‍💻 Author
+## 👨‍💻 Author
 
 Amr — AI Engineer in progress.
