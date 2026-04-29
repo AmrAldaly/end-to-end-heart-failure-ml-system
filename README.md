@@ -8,7 +8,7 @@
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0%2B-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
-[![AWS](https://img.shields.io/badge/AWS-ECS%20%7C%20ECR-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com)
+[![Azure](https://img.shields.io/badge/Azure-Container%20Apps-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
 
 > **Predicting heart failure survival outcomes from clinical records through a modular, containerized ML pipeline — engineered for reproducibility, scalability, and production deployment.**
@@ -30,7 +30,7 @@
 - [Installation & Reproducibility](#-installation--reproducibility)
   - [Local Setup (venv)](#1-local-setup-venv)
   - [Docker (Recommended)](#2-docker-recommended)
-  - [Cloud Deployment](#3-cloud-deployment-aws)
+  - [Cloud Deployment](#3-cloud-deployment-azure)
 - [Screenshots](#-screenshots)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -43,7 +43,7 @@ Heart failure is a leading cause of mortality worldwide, with clinical outcomes 
 
 Unlike conventional notebook-based prototypes, this system is architected as a **modular, production-ready pipeline** — enforcing strict separation of concerns between data ingestion, feature transformation, model training, and inference. Every intermediate artifact is serialized to disk, enabling deterministic, fully reproducible predictions at inference time without re-computation.
 
-The trained classifier, a `HistGradientBoostingClassifier` selected via exhaustive `GridSearchCV` hyperparameter optimization, is served through a containerized **Flask REST API**, deployable to AWS ECS or Azure Container Apps with zero configuration changes.
+The trained classifier, a `HistGradientBoostingClassifier` selected via exhaustive `GridSearchCV` hyperparameter optimization, is served through a containerized **Flask REST API**, deployable to **Azure Container Apps** with zero configuration changes.
 
 **Key Value Proposition:** This project demonstrates not only sound ML methodology, but the engineering discipline required to take a model from experimentation to a scalable, maintainable, cloud-deployable service.
 
@@ -142,7 +142,7 @@ flowchart LR
 | **Serialization** | Dill | Artifact persistence for model and preprocessor |
 | **Web Framework** | Flask | REST API and web interface server |
 | **Containerization** | Docker | Scalable, portable application packaging |
-| **Cloud Platform** | AWS ECS / ECR | Production-grade container orchestration |
+| **Cloud Platform** | Azure Container Apps / ACR | Production-grade container orchestration |
 | **Frontend** | HTML5, CSS3, Jinja2 | Web UI templating |
 
 ---
@@ -153,10 +153,11 @@ flowchart LR
 heart-failure-prediction/
 │
 ├── artifacts/                      # Serialized pipeline artifacts (auto-generated)
-│   ├── model.dill                  # Trained HistGradientBoostingClassifier
-│   ├── preprocessor.dill           # Fitted ColumnTransformer
+│   ├── model.pkl                  # Trained HistGradientBoostingClassifier
+│   ├── preprocessor.pkl           # Fitted ColumnTransformer
 │   ├── train.csv                   # Training split
 │   └── test.csv                    # Test split
+    └── data.csv
 │
 ├── src/
 │   ├── components/                 # Core pipeline components
@@ -166,15 +167,14 @@ heart-failure-prediction/
 │   │
 │   ├── pipeline/
 │   │   └── predict_pipeline.py     # Inference pipeline (loads artifacts)
+        └── train_pipeline.py 
 │   │
 │   ├── utils.py                    # Shared utility functions
 │   ├── exception.py                # Centralized exception handling
 │   └── logger.py                   # Structured logging configuration
 │
 ├── templates/                      # Jinja2 HTML templates
-│   ├── index.html                  # Landing page
-│   ├── home.html                   # Patient input form
-│   └── result.html                 # Prediction result view
+│   └── index.html                 # Landing page
 │
 ├── static/                         # Static assets (CSS, JS, images)
 ├── assets/                         # Documentation screenshots
@@ -182,7 +182,9 @@ heart-failure-prediction/
 ├── app.py                          # Flask application entry point
 ├── Dockerfile                      # Container build specification
 ├── requirements.txt                # Pinned Python dependencies
-└── README.md
+├── README.md
+├── .dockerignore
+└── setup.py
 ```
 
 ---
@@ -220,7 +222,7 @@ The following table reflects model evaluation on the held-out test set. Metrics 
 | HistGradientBoostingClassifier ⭐ | `_.__` | `_.__` | `_.__` | `_.__` | `_.__` |
 | RandomForestClassifier | `_.__` | `_.__` | `_.__` | `_.__` | `_.__` |
 | LogisticRegression | `_.__` | `_.__` | `_.__` | `_.__` | `_.__` |
-| SVC | `_.__` | `_.__` | `_.__` | `_.__` | `_.__` |
+| KNN | `_.__` | `_.__` | `_.__` | `_.__` | `_.__` |
 | XGBClassifier | `_.__` | `_.__` | `_.__` | `_.__` | `_.__` |
 
 > ⭐ **Best Model:** `HistGradientBoostingClassifier` — selected based on F1 Score, which best accounts for class imbalance in this clinical context.
@@ -302,7 +304,7 @@ The Flask application exposes the following endpoints:
 
 - Python `3.10+`
 - Docker `24.0+` (for containerized deployment)
-- AWS CLI `2.x` (for cloud deployment)
+- Azure CLI `2.x` (for cloud deployment)
 
 ---
 
@@ -357,30 +359,36 @@ docker build \
 
 ---
 
-### 3. Cloud Deployment (AWS)
+### 3. Cloud Deployment (Azure)
 
-The containerized application is deployable to **AWS ECS** via **Amazon ECR** with zero code modifications.
+The containerized application is deployable to **Azure Container Apps** via **Azure Container Registry (ACR)** with zero code modifications.
 
 ```bash
-# Authenticate Docker with ECR
-aws ecr get-login-password --region <region> | \
-  docker login --username AWS --password-stdin <account_id>.dkr.ecr.<region>.amazonaws.com
+# Log in to Azure
+az login
 
-# Create an ECR repository
-aws ecr create-repository --repository-name heart-failure-ml
+# Create a resource group
+az group create --name heart-failure-rg --location eastus
+
+# Create an Azure Container Registry
+az acr create --resource-group heart-failure-rg \
+  --name heartfailureacr --sku Basic
+
+# Log in to ACR
+az acr login --name heartfailureacr
 
 # Tag and push the image
-docker tag heart-failure-ml:latest <account_id>.dkr.ecr.<region>.amazonaws.com/heart-failure-ml:latest
-docker push <account_id>.dkr.ecr.<region>.amazonaws.com/heart-failure-ml:latest
+docker tag heart-failure-ml:latest heartfailureacr.azurecr.io/heart-failure-ml:latest
+docker push heartfailureacr.azurecr.io/heart-failure-ml:latest
 
-# Deploy via ECS (requires task definition configured)
-aws ecs update-service \
-  --cluster <cluster-name> \
-  --service <service-name> \
-  --force-new-deployment
+# Deploy to Azure Container Apps
+az containerapp up \
+  --name heart-failure-app \
+  --resource-group heart-failure-rg \
+  --image heartfailureacr.azurecr.io/heart-failure-ml:latest \
+  --target-port 8000 \
+  --ingress external
 ```
-
-> Equivalent deployment to **Azure Container Apps** is supported. Set the `AZURE_REGISTRY` environment variable and push to Azure Container Registry (ACR) using the same image.
 
 ---
 
@@ -424,3 +432,4 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 *If this project was useful to you, consider giving it a ⭐*
 
 </div>
+
