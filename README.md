@@ -90,7 +90,7 @@ flowchart LR
         F -->|Normal| H[StandardScaler]
         G --> I[ColumnTransformer]
         H --> I
-        I --> J[Serialize Preprocessor\npreprocessor.dill]
+        I --> J[Serialize Preprocessor\npreprocessor.pkl]
     end
 
     J --> K
@@ -99,13 +99,13 @@ flowchart LR
         K[Load Transformed Data] --> L[Multi-Model Comparison]
         L --> M[GridSearchCV\nHyperparameter Tuning]
         M --> N[Select Best Model\nF1 Score Criterion]
-        N --> O[Serialize Model\nmodel.dill]
+        N --> O[Serialize Model\nmodel.pkl]
     end
 
     O --> P
 
     subgraph inference["④ Prediction Pipeline"]
-        P[Load model.dill\n+ preprocessor.dill] --> Q[Transform Input]
+        P[Load model.pkl\n+ preprocessor.pkl] --> Q[Transform Input]
         Q --> R[Run Inference]
         R --> S[🫀 Survival\nPrediction]
     end
@@ -122,13 +122,13 @@ flowchart LR
 > Reads the raw clinical records dataset, performs a stratified train/test split, and persists the resulting subsets to the `artifacts/` directory. This ensures downstream components always operate on a consistent, version-controlled data split.
 
 **② Data Transformation**
-> Applies a dual-scaler strategy within a `ColumnTransformer`: `RobustScaler` is applied to features with high skewness (resilient to outliers), while `StandardScaler` normalizes near-normally distributed features. Outlier clipping via **Winsorization** is applied upstream. The fitted `ColumnTransformer` is serialized as `preprocessor.dill` — a critical artifact ensuring training-serving skew is eliminated at inference time.
+> Applies a dual-scaler strategy within a `ColumnTransformer`: `RobustScaler` is applied to features with high skewness (resilient to outliers), while `StandardScaler` normalizes near-normally distributed features. Outlier clipping via **Winsorization** is applied upstream. The fitted `ColumnTransformer` is serialized as `preprocessor.pkl` — a critical artifact ensuring training-serving skew is eliminated at inference time.
 
 **③ Model Training**
-> Multiple classifiers are evaluated in a systematic comparison. `GridSearchCV` with cross-validation drives hyperparameter optimization. The winning model — `HistGradientBoostingClassifier` — is selected based on F1 Score, appropriate for the clinical imbalance context. The fitted estimator is serialized as `model.dill`.
+> Multiple classifiers are evaluated in a systematic comparison. `GridSearchCV` with cross-validation drives hyperparameter optimization. The winning model — `HistGradientBoostingClassifier` — is selected based on F1 Score, appropriate for the clinical imbalance context. The fitted estimator is serialized as `model.pkl`.
 
 **④ Prediction Pipeline**
-> The inference path exclusively loads `model.dill` and `preprocessor.dill`. Raw feature input is transformed through the identical preprocessing graph used during training before being passed to the estimator — guaranteeing consistent, reproducible predictions.
+> The inference path exclusively loads `model.pkl` and `preprocessor.pkl`. Raw feature input is transformed through the identical preprocessing graph used during training before being passed to the estimator — guaranteeing consistent, reproducible predictions.
 
 ---
 
@@ -139,7 +139,7 @@ flowchart LR
 | **Language** | Python 3.10+ | Core implementation language |
 | **Data Processing** | Pandas, NumPy | Data manipulation and numerical computation |
 | **ML Framework** | Scikit-learn | Preprocessing, modeling, and evaluation |
-| **Serialization** | Dill | Artifact persistence for model and preprocessor |
+| **Serialization** | Pickle | Artifact persistence for model and preprocessor |
 | **Web Framework** | Flask | REST API and web interface server |
 | **Containerization** | Docker | Scalable, portable application packaging |
 | **Cloud Platform** | Azure Container Apps / ACR | Production-grade container orchestration |
@@ -153,11 +153,11 @@ flowchart LR
 heart-failure-prediction/
 │
 ├── artifacts/                      # Serialized pipeline artifacts (auto-generated)
-│   ├── model.pkl                  # Trained HistGradientBoostingClassifier
-│   ├── preprocessor.pkl           # Fitted ColumnTransformer
+│   ├── model.pkl                   # Trained HistGradientBoostingClassifier
+│   ├── preprocessor.pkl            # Fitted ColumnTransformer
 │   ├── train.csv                   # Training split
-│   └── test.csv                    # Test split
-    └── data.csv
+│   ├── test.csv                    # Test split
+│   └── data.csv                    # Raw dataset copy
 │
 ├── src/
 │   ├── components/                 # Core pipeline components
@@ -166,25 +166,24 @@ heart-failure-prediction/
 │   │   └── model_trainer.py        # Model comparison, tuning & selection
 │   │
 │   ├── pipeline/
-│   │   └── predict_pipeline.py     # Inference pipeline (loads artifacts)
-        └── train_pipeline.py 
+│   │   └── predict_pipeline.py       # Inference pipeline (loads artifacts)
 │   │
 │   ├── utils.py                    # Shared utility functions
 │   ├── exception.py                # Centralized exception handling
 │   └── logger.py                   # Structured logging configuration
 │
 ├── templates/                      # Jinja2 HTML templates
-│   └── index.html                 # Landing page
+│   └── index.html                  # Application entry page
 │
 ├── static/                         # Static assets (CSS, JS, images)
 ├── assets/                         # Documentation screenshots
 │
 ├── app.py                          # Flask application entry point
 ├── Dockerfile                      # Container build specification
+├── .dockerignore                   # Docker build context exclusions
+├── setup.py                        # Package installation configuration
 ├── requirements.txt                # Pinned Python dependencies
-├── README.md
-├── .dockerignore
-└── setup.py
+└── README.md
 ```
 
 ---
@@ -432,4 +431,3 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 *If this project was useful to you, consider giving it a ⭐*
 
 </div>
-
